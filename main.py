@@ -3,6 +3,7 @@ import argparse
 import requests
 import io
 import re
+from datetime import datetime
 
 def download_data(url):
 
@@ -62,17 +63,32 @@ def browser_hits(csv_data):
     print(f"{maximum.capitalize()} is the most used browser at {browser[maximum]} hits")
 
 
+def hour_hits(csv):
+    hours = {}
+    for row in csv:
+        timestamp = datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')
+        hour = timestamp.hour
+        if hour not in hours:
+            hours[hour] = 0
+        hours[hour] += 1
+
+    hour_hits = sorted(hours.items())
+
+    for hour, hits in hour_hits:
+        print(f"Hour {hour} has {hits} hits")
+
 def main(url):
     url_data = download_data(url)
 
     csv_data_image = csv.reader(io.StringIO(url_data))
     csv_data_browser = csv.reader(io.StringIO(url_data))
     new = csv.reader(io.StringIO(url_data))
-
+    csv_data_hour = csv.reader(io.StringIO(url_data))
     amount = total(new)
 
     image_hits(csv_data_image, amount)
     browser_hits(csv_data_browser)
+    hour_hits(csv_data_hour)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
